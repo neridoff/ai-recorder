@@ -225,7 +225,7 @@ scripts/                  загрузка библиотек и моделей,
 install.sh                установка для пользователей
 ```
 
-**CI и выпуск версии.** GitHub Actions на каждый push и pull request собирает проект, гоняет тесты и собирает `.app` (`.github/workflows/ci.yml`). Чтобы выпустить версию:
+**CI и выпуск версии.** GitHub Actions на каждый push и pull request (кроме правок только в `.md`) собирает проект, гоняет тесты и собирает `.app` (`.github/workflows/ci.yml`). Чтобы выпустить версию:
 1. Поднимите `CFBundleShortVersionString` и `CFBundleVersion` в `Resources/Info.plist`, запушьте в `main`, дождитесь зелёного CI.
 2. Поставьте тег:
    ```bash
