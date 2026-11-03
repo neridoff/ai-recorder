@@ -27,6 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Код собирается только Swift 6+: по умолчанию на macos-14 стоит Xcode 15.4 (Swift 5.10)
+      - name: Xcode 16 (Swift 6)
+        run: |
+          ls -d /Applications/Xcode_*.app
+          xcode="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)"
+          if [ -z "$xcode" ]; then echo "::error::На раннере нет Xcode 16"; exit 1; fi
+          sudo xcode-select -s "$xcode/Contents/Developer"
+
       - name: Версии
         run: |
           sw_vers

@@ -127,8 +127,9 @@ if [ "$(uname -m)" != "arm64" ]; then
     fail "Нужен Mac на Apple Silicon (M1 или новее). На Mac с Intel приложение не работает."
 fi
 MACOS="$(sw_vers -productVersion)"
-if ! version_ge "$MACOS" "13.3"; then
-    fail "Нужна macOS 13.3 или новее, у вас $MACOS. Обновите macOS и запустите install.sh снова."
+# Приложение работает на 13.3+, но собрать его можно только Swift 6, а ему нужна macOS 14.5+
+if ! version_ge "$MACOS" "14.5"; then
+    fail "Нужна macOS 14.5 или новее, у вас $MACOS. Обновите macOS и запустите install.sh снова."
 fi
 FREE_KB=$(df -k "$HOME" | awk 'NR==2 {print $4}')
 if [ "${FREE_KB:-0}" -lt 2000000 ]; then
@@ -148,8 +149,10 @@ if ! xcode-select -p >/dev/null 2>&1 || ! swift --version >/dev/null 2>&1; then
 fi
 SWIFT_VERSION="$(swift --version 2>&1 | sed -n 's/.*Swift version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -1)"
 echo "swift $SWIFT_VERSION, $(xcode-select -p)" >> "$LOG"
-if [ -z "$SWIFT_VERSION" ] || ! version_ge "$SWIFT_VERSION" "5.9"; then
-    fail "нужен Swift 5.9 или новее, у вас ${SWIFT_VERSION:-неизвестно}. Обновите инструменты: Системные настройки → Основные → Обновление ПО."
+# Код собирается только Swift 6+ (Xcode 16 или Command Line Tools 16, им нужна macOS 14.5+):
+# Swift 5.10 падает на проверках многопоточности в RecorderController
+if [ -z "$SWIFT_VERSION" ] || ! version_ge "$SWIFT_VERSION" "6.0"; then
+    fail "нужен Swift 6 или новее, у вас ${SWIFT_VERSION:-неизвестно}. Обновите macOS до 14.5 или новее, затем инструменты: Системные настройки → Основные → Обновление ПО."
 fi
 if ! xcrun --find actool >/dev/null 2>&1; then
     step_note "Внимание: нет actool (он есть только в полном Xcode). Значок в уведомлениях"
