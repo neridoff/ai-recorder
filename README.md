@@ -1,5 +1,4 @@
-# AI Recorder: этапы E1 (каркас и захват), E2 (выравнивание и дрейф), E3 (расшифровка), E4 (разметка говорящих), E5 (сжатие и срок хранения аудио), E5.1 (сроки, настройки, записи без результата), E5.2 (установка для коллег, проверка обновлений)
-
+# AI Recorder
 [![CI](https://github.com/neridoff/ai-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/neridoff/ai-recorder/actions/workflows/ci.yml)
 
 Приложение в меню-баре записывает системный звук (ScreenCaptureKit) и микрофон (AVAudioEngine) в две отдельные дорожки. Для каждой дорожки фиксируется время первого сэмпла в host time. При сбое записанное сохраняется.
