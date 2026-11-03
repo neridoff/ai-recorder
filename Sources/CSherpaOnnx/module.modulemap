@@ -1,0 +1,7 @@
+// C API sherpa-onnx v1.13.8 (ADR-004 решение 23). Заголовок и dylib скачивает
+// scripts/fetch-sherpa-onnx.sh в app/Vendor/sherpa-onnx/.
+module CSherpaOnnx [system] {
+    header "../../Vendor/sherpa-onnx/include/c-api.h"
+    link "sherpa-onnx-c-api"
+    export *
+}

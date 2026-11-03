@@ -1,0 +1,10 @@
+build/
+.build/
+Vendor/
+graphify-out/
+.DS_Store
+*.part
+*.caf
+*.m4a
+Labels.txt
+reviewed.md

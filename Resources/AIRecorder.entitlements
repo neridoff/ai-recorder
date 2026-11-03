@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Hardened runtime: без этого ключа доступа к микрофону не будет -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+    <!-- E3: whisper.framework подписан ad-hoc. Без сертификата разработчика у приложения
+         и фреймворка нет общего Team ID, и проверка библиотек hardened runtime его не загрузит
+         (ADR-004, решение 11) -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+</dict>
+</plist>
