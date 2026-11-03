@@ -35,7 +35,7 @@
 
 **Что нужно:**
 - Mac на Apple Silicon (M1 или новее);
-- macOS 13.3 или новее;
+- macOS 14.5 или новее (для сборки нужен Swift 6);
 - около 2 ГБ свободного места;
 - интернет на время установки.
 
@@ -194,7 +194,7 @@ log stream --predicate 'subsystem == "com.neridov.airecorder"' --info
 
 ## Для разработчиков
 
-Сборка и тесты (Swift 5.9+, macOS 13.3+, Apple Silicon):
+Сборка и тесты (Swift 6+, то есть Xcode 16 или Command Line Tools 16, macOS 14.5+, Apple Silicon):
 
 ```bash
 ./scripts/fetch-sherpa-onnx.sh   # библиотеки sherpa-onnx в Vendor/ (один раз)
