@@ -1,5 +1,7 @@
 # AI Recorder: этапы E1 (каркас и захват), E2 (выравнивание и дрейф), E3 (расшифровка), E4 (разметка говорящих), E5 (сжатие и срок хранения аудио), E5.1 (сроки, настройки, записи без результата), E5.2 (установка для коллег, проверка обновлений)
 
+[![CI](https://github.com/neridoff/ai-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/neridoff/ai-recorder/actions/workflows/ci.yml)
+
 Приложение в меню-баре записывает системный звук (ScreenCaptureKit) и микрофон (AVAudioEngine) в две отдельные дорожки. Для каждой дорожки фиксируется время первого сэмпла в host time. При сбое записанное сохраняется.
 CLI `mix-session` сводит дорожки в `mixed.m4a` с выравниванием по времени первого сэмпла и замеряет дрейф по anchors.
 Запись можно ставить на паузу. После «Остановить запись» приложение само расшифровывает обе дорожки через whisper.cpp без сети, размечает говорящих через sherpa-onnx и пишет `transcript.json` и читабельный `transcript.md`, по завершении приходит уведомление macOS. То же делает CLI `transcribe-session`.
@@ -120,6 +122,22 @@ open build/AIRecorder.app
 Запуск записи без клика по меню (для проверок): `open -n build/AIRecorder.app --args -autoRecordSeconds 90`. Приложение начнёт запись сразу и остановит её через 90 с. Флаг `-n` обязателен, если приложение уже запущено: без него `open` не передаст аргументы. Так же `--args -autoTranscribeLast YES` сразу расшифровывает последнюю запись, `--args -openSettings YES` открывает окно настроек.
 
 Журнал: `log stream --predicate 'subsystem == "com.neridov.airecorder"' --info`.
+
+## CI и выпуск версии
+
+GitHub Actions (`.github/workflows/`):
+- `ci.yml` — на каждый push в `main` и на pull request: `bash -n` для `install.sh` и `scripts/`, `fetch-sherpa-onnx.sh`, `swift test`, `build-app.sh` и проверка подписи `.app`. Раннер `macos-15` (Apple Silicon). Модели не скачиваются: тесты работают на заглушках.
+- `release.yml` — на push тега `vX.Y.Z`: проверяет, что тег совпадает с `CFBundleShortVersionString` в `Resources/Info.plist`, прогоняет `ci.yml` и создаёт релиз на GitHub с автоматическим списком изменений. Готовое приложение к релизу не прикладывается: коллеги собирают его у себя через `install.sh` (ADR-007). Пункт «Проверить обновления…» читает именно этот релиз.
+
+Как выпустить версию:
+1. Поднять `CFBundleShortVersionString` (например, `0.2.0`) и `CFBundleVersion` в `Resources/Info.plist`, закоммитить и запушить в `main`, дождаться зелёного CI.
+2. Поставить тег и отправить его:
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+3. Когда `Release` закончится, у коллег по «Проверить обновления…» появится «Доступна версия 0.2.0». Описание релиза можно поправить на GitHub.
 
 ## Что пишется
 

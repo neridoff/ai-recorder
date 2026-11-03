@@ -1,0 +1,47 @@
+# Выпуск версии (E5.2, ADR-007): push тега vX.Y.Z → проверка версии, CI, релиз на GitHub.
+# Готовое приложение к релизу не прикладывается: коллеги собирают его у себя через install.sh,
+# поэтому Gatekeeper его не блокирует. «Проверить обновления…» в приложении читает этот релиз.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Тег совпадает с CFBundleShortVersionString
+        run: |
+          plist="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' Resources/Info.plist)"
+          tag="${GITHUB_REF_NAME#v}"
+          echo "тег $GITHUB_REF_NAME, Info.plist $plist"
+          if [ "$tag" != "$plist" ]; then
+            echo "::error::Тег $GITHUB_REF_NAME не совпадает с версией $plist в Resources/Info.plist"
+            exit 1
+          fi
+
+  ci:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Релиз на GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Релиз $GITHUB_REF_NAME уже есть, не трогаю"
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --title "AI Recorder ${GITHUB_REF_NAME#v}" --generate-notes
+          fi

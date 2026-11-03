@@ -1,0 +1,55 @@
+# CI (E5.2): сборка, тесты и сборка .app на каждый push в main и на pull request.
+# Модели (610 МБ) не скачиваются: тесты подменяют движки заглушками.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:   # release.yml запускает те же проверки перед релизом
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-15   # Apple Silicon, как у пользователей (install.sh требует arm64)
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Версии
+        run: |
+          sw_vers
+          uname -m
+          swift --version
+          xcode-select -p
+
+      - name: Проверка скриптов (bash 3.2)
+        run: |
+          for f in install.sh scripts/*.sh; do /bin/bash -n "$f"; done
+
+      - name: Кеш sherpa-onnx и whisper.xcframework
+        uses: actions/cache@v4
+        with:
+          path: |
+            Vendor/sherpa-onnx
+            ~/Library/Caches/org.swift.swiftpm
+          key: vendor-${{ runner.os }}-${{ hashFiles('scripts/fetch-sherpa-onnx.sh', 'Package.swift') }}
+
+      - name: Библиотека sherpa-onnx
+        run: ./scripts/fetch-sherpa-onnx.sh
+
+      - name: Тесты
+        run: swift test
+
+      - name: Сборка AIRecorder.app
+        run: |
+          ./scripts/build-app.sh
+          codesign --verify --strict build/AIRecorder.app
+          test -f build/AIRecorder.app/Contents/Resources/AppIcon.icns
+          /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" build/AIRecorder.app/Contents/Info.plist
