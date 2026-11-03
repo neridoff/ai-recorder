@@ -11,9 +11,11 @@ on:
 permissions:
   contents: read
 
+# Новый push в pull request отменяет устаревший прогон. В main прогоны не отменяются:
+# отменённый прогон значок CI показывает как «failing».
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
