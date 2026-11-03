@@ -2,10 +2,13 @@
 # Модели (610 МБ) не скачиваются: тесты подменяют движки заглушками.
 name: CI
 
+# Правки только текста (.md) Mac-раннер не занимают: их на GitHub мало, очередь бывает долгой.
 on:
   push:
     branches: [main]
+    paths-ignore: ['**.md']
   pull_request:
+    paths-ignore: ['**.md']
   workflow_call:   # release.yml запускает те же проверки перед релизом
 
 permissions:
